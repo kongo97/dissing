@@ -1,7 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
-
+use App\Http\Controllers\YoutubeController;
 /*
 |--------------------------------------------------------------------------
 | Web Routes
@@ -13,6 +13,8 @@ use Illuminate\Support\Facades\Route;
 |
 */
 
-Route::get('/', function () {
-    return view('welcome');
-});
+Route::get('/', [YoutubeController::class, 'index']);
+
+Route::post('/search', [YoutubeController::class, 'search']);
+
+Route::get('/oauth2callback', [YoutubeController::class, 'oauth2callback']);
