@@ -1,5 +1,5 @@
 <v-app-bar
-    color="primary text-center white--text"
+    color="blue-grey darken-4 text-center white--text"
     >
-    Dissing
+    <h1 style="font-family: Black Ops one">Dissing</h1>
 </v-app-bar>

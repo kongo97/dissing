@@ -32,7 +32,7 @@ class YoutubeService
             $youtube = new Google_Service_YouTube($client);
 
             $queryParams = [
-                'maxResults' => 25,
+                'maxResults' => 5,
                 'q' => $search
             ];
             

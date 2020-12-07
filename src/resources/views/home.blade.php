@@ -1,9 +1,66 @@
+<template>
+  <v-card>
+    <v-card-text>
+
+    <v-row>
+        <v-col cols="12" md="3">
+            <v-btn
+                x-large
+                color="blue-grey"
+                dark
+                @click="onYouTubeIframeAPIReady"
+                v-if="list"
+            >
+                Start
+            </v-btn>
+        </v-col>
+
+        <v-col cols="12" md="3">
+            <v-switch
+                v-model = 'words_enable'
+                label = 'Words'
+                @change = 'toggleWords'
+            ></v-switch>
+        </v-col>
+
+        <v-col cols="12" md="3">
+            <v-slider
+                v-model="timeout"
+                step="1"
+                thumb-label
+                ticks
+                label="timeout"
+                :max="max"
+                :min="min"
+            ></v-slider>
+        </v-col>
+    </v-row>
+    
+    </v-card-text>
+  </v-card>
+</template>
+
 <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
-<div id="player" src="https://www.youtube.com/iframe_api"></div> 
+<div id="player" src="https://www.youtube.com/iframe_api" style="display: none;"></div>
+
+<p id="word">@{{ word }}</p>
 
   
 <!-- VUE -->
 @section("vue")
+<style>
+    #word {
+        position: absolute;
+        left: 0;
+        right: 0;
+        height: 100px;
+        top: calc(50% - 50px);
+        font-family: 'Black Ops One';
+        text-align: center;
+        font-size: 3rem;
+    }
+</style>
+
 <script>
     // 2. This code loads the IFrame Player API code asynchronously.
     var tag = document.createElement('script');
@@ -20,6 +77,22 @@
             search: 'freestyle beat',
             player: null,
             list: false,
+            timeout: 3,
+            word: '',
+            word_index: 0,
+            max: 10,
+            min: 1,
+            words_enable: false,
+            words: [
+                'prova',
+                'parola',
+                'simone',
+                'antonio',
+                'cane',
+                'pippo',
+                'formaggio',
+                'bomba'
+            ],
         },
         methods: {
             onYouTubeIframeAPIReady() {
@@ -34,6 +107,23 @@
                 });
             },
 
+            changeWord: function() {
+                self = this;
+                this.word_index++;
+                const int = setInterval(() => {
+                    self.setWord(self.words[self.word_index]);
+
+                    clearInterval(int);
+
+                    if(this.words_enable)
+                        return self.changeWord();                    
+                }, this.timeout*1000);
+            },
+
+            setWord(_word) {
+                this.word = _word;
+            },
+
             getRandomBeat() {
                 min = Math.ceil(0);
                 max = Math.floor(24);
@@ -42,7 +132,7 @@
             },
 
             onPlayerReady(event) {
-                //event.target.playVideo();
+                event.target.playVideo();
             },
 
             onPlayerStateChange(event) {
@@ -52,8 +142,21 @@
                 }
             },
 
+            stopVideo() {
+                this.player.stopVideo();
+            },
+
+            playVideo() {
+                this.player.playVideo();
+            },
+
             refreshList(_list) {
                 this.list = _list;
+            },
+
+            toggleWords() {
+                if(this.words_enable)
+                    this.changeWord();
             },
 
             getBeats() {
