@@ -4,6 +4,30 @@
 
     <v-row>
         <v-col cols="12" md="1">
+            <v-btn
+                x-large
+                color="#263238"
+                dark
+                @click="stopVideo"
+                v-if="player"
+            >
+                STOP
+            </v-btn>
+        </v-col>
+
+        <v-col cols="12" md="1">
+            <v-btn
+                x-large
+                color="#263238"
+                dark
+                @click="playVideo"
+                v-if="player"
+            >
+                PLAY
+            </v-btn>
+        </v-col>
+
+        <v-col cols="12" md="1">
             <v-row>
                 <v-layout column align-center>
                     <v-switch
@@ -71,17 +95,18 @@
         margin-top: 100px;
         height: auto;
         padding: 100px;
-
         box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
         transform: scale(1);
         animation: pulse 5s infinite;
+        margin-left: 20%;
+        margin-right: 20%;
     }
 
     #word p {
         font-family: 'Nunito', sans-serif;
         font-weight: 800;
         text-align: center;
-        font-size: 10rem;
+        font-size: 5rem;
         text-transform: uppercase;
         color: #263238;
     }
