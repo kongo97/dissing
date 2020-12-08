@@ -9,18 +9,22 @@
                 color="blue-grey"
                 dark
                 @click="onYouTubeIframeAPIReady"
-                v-if="list"
+                v-if="beat"
             >
                 Start
             </v-btn>
         </v-col>
 
         <v-col cols="12" md="3">
-            <v-switch
-                v-model = 'words_enable'
-                label = 'Words'
-                @change = 'toggleWords'
-            ></v-switch>
+            <v-row>
+                <v-layout column align-center>
+                    <v-switch
+                        v-model = 'words_enable'
+                        label = 'Words'
+                        @change = 'toggleWords'
+                    ></v-switch>
+                </v-layout>
+            </v-row>
         </v-col>
 
         <v-col cols="12" md="3">
@@ -74,7 +78,7 @@
         el: '#app',
         vuetify: new Vuetify(),
         data: {
-            search: 'freestyle beat',
+            search: 'beat rap extrabeat',
             player: null,
             list: false,
             timeout: 3,
@@ -82,6 +86,7 @@
             word_index: 0,
             max: 10,
             min: 1,
+            beat: false,
             words_enable: false,
             words: [
                 'prova',
@@ -99,7 +104,7 @@
                 this.player = new YT.Player('player', {
                     height: '390',
                     width: '640',
-                    videoId: this.getRandomBeat(),
+                    videoId: this.beat.id_youtube,
                     events: {
                     'onReady': this.onPlayerReady,
                     'onStateChange': this.onPlayerStateChange
@@ -154,6 +159,10 @@
                 this.list = _list;
             },
 
+            refreshBeat(_beat) {
+                this.beat = _beat;
+            },
+
             toggleWords() {
                 if(this.words_enable)
                     this.changeWord();
@@ -181,12 +190,34 @@
                     self.refreshList(list);
                 });
             },
+
+            getBeat() {
+                self = this;
+
+                axios.post('/getBeat', {})
+                .then(function (response) 
+                {
+                    console.log('response', response);
+
+                    // case error
+                    if (response.data.result === false) {
+                        return false;
+                    } 
+
+                    console.log('beat', response.data);
+
+                    beat = response.data;
+
+                    self.refreshBeat(beat);
+                });
+            },
+
             clear () {
                 this.search = ''
             },
         },
         created: function(){
-            this.getBeats();
+            this.getBeat();
         }
     })
   </script>
