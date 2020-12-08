@@ -23,7 +23,7 @@ class BeatService
     {
         $count = count(Beat::all());
         $random = rand(1, $count);
-        $beat = Beat::select('id, id_youtube, title')->where('id', $random)->first();
+        $beat = Beat::inRandomOrder()->first();
 
         return $beat;
     }

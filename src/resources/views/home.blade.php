@@ -3,32 +3,22 @@
     <v-card-text>
 
     <v-row>
-        <v-col cols="12" md="3">
-            <v-btn
-                x-large
-                color="blue-grey"
-                dark
-                @click="onYouTubeIframeAPIReady"
-                v-if="beat"
-            >
-                Start
-            </v-btn>
-        </v-col>
-
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="1">
             <v-row>
                 <v-layout column align-center>
                     <v-switch
                         v-model = 'words_enable'
                         label = 'Words'
                         @change = 'toggleWords'
+                        v-if="words"
                     ></v-switch>
                 </v-layout>
             </v-row>
         </v-col>
 
-        <v-col cols="12" md="3">
+        <v-col cols="12" md="2">
             <v-slider
+                style="margin-top: 10px;"
                 v-model="timeout"
                 step="1"
                 thumb-label
@@ -47,21 +37,83 @@
 <!-- 1. The <iframe> (and video player) will replace this <div> tag. -->
 <div id="player" src="https://www.youtube.com/iframe_api" style="display: none;"></div>
 
-<p id="word">@{{ word }}</p>
+<template>
+    <v-card id="word" v-if="words_enable" elevation="5">
+        <v-card-text>
+            <p>@{{ word }}</p>
 
+            <v-progress-circular v-if="!word"
+                :size="70"
+                :width="7"
+                color="#D32F2F"
+                indeterminate
+            ></v-progress-circular>
+        </v-card-text>
+    </v-card>
+</template>
+
+
+<v-btn
+    id="next"
+    x-large
+    color="#D32F2F"
+    dark
+    @click="getBeat"
+    v-if="beat"
+>
+    Next
+</v-btn>
   
 <!-- VUE -->
 @section("vue")
 <style>
     #word {
-        position: absolute;
-        left: 0;
-        right: 0;
-        height: 100px;
-        top: calc(50% - 50px);
-        font-family: 'Black Ops One';
+        margin-top: 100px;
+        height: auto;
+        padding: 100px;
+
+        box-shadow: 0 0 0 0 rgba(0, 0, 0, 1);
+        transform: scale(1);
+        animation: pulse 5s infinite;
+    }
+
+    #word p {
+        font-family: 'Nunito', sans-serif;
+        font-weight: 800;
         text-align: center;
-        font-size: 3rem;
+        font-size: 10rem;
+        text-transform: uppercase;
+        color: #263238;
+    }
+
+    #next {
+        position: fixed;
+        width: 80px;
+        bottom: 50px;
+        left: calc(50% - 40px);
+        right: calc(50% - 40px);
+    }
+
+    .v-input--selection-controls.v-input {
+        flex: 0 1 auto;
+        margin-top: 10px;
+    }
+
+    @keyframes pulse {
+        0% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0.7);
+        }
+
+        70% {
+            transform: scale(1);
+            box-shadow: 0 0 0 10px rgba(0, 0, 0, 0);
+        }
+
+        100% {
+            transform: scale(0.95);
+            box-shadow: 0 0 0 0 rgba(0, 0, 0, 0);
+        }
     }
 </style>
 
@@ -78,7 +130,7 @@
         el: '#app',
         vuetify: new Vuetify(),
         data: {
-            search: 'beat rap extrabeat',
+            search: 'beat rap hard',
             player: null,
             list: false,
             timeout: 3,
@@ -88,16 +140,7 @@
             min: 1,
             beat: false,
             words_enable: false,
-            words: [
-                'prova',
-                'parola',
-                'simone',
-                'antonio',
-                'cane',
-                'pippo',
-                'formaggio',
-                'bomba'
-            ],
+            words: false,
         },
         methods: {
             onYouTubeIframeAPIReady() {
@@ -116,7 +159,7 @@
                 self = this;
                 this.word_index++;
                 const int = setInterval(() => {
-                    self.setWord(self.words[self.word_index]);
+                    self.setWord(self.words[self.word_index].word);
 
                     clearInterval(int);
 
@@ -141,9 +184,8 @@
             },
 
             onPlayerStateChange(event) {
-                if (event.data == YT.PlayerState.PLAYING && !done) {
-                setTimeout(stopVideo, 6000);
-                done = true;
+                if (event.data == YT.PlayerState.PLAYING) {
+                setTimeout(this.player.stopVideo, 6000);
                 }
             },
 
@@ -161,6 +203,10 @@
 
             refreshBeat(_beat) {
                 this.beat = _beat;
+            },
+
+            refreshWords(_words) {
+                this.words = _words;
             },
 
             toggleWords() {
@@ -194,6 +240,14 @@
             getBeat() {
                 self = this;
 
+                if(this.player != null)
+                {
+                    this.stopVideo();
+                    this.player.destroy();
+                }
+                
+                this.player = null;
+
                 axios.post('/getBeat', {})
                 .then(function (response) 
                 {
@@ -209,6 +263,37 @@
                     beat = response.data;
 
                     self.refreshBeat(beat);
+
+                    self.onYouTubeIframeAPIReady();
+                });
+            },
+
+            getWords() {
+                self = this;
+
+                if(this.player != null)
+                {
+                    this.stopVideo();
+                    this.player.destroy();
+                }
+                
+                this.player = null;
+
+                axios.post('/getWords', {})
+                .then(function (response) 
+                {
+                    console.log('response', response);
+
+                    // case error
+                    if (response.data.result === false) {
+                        return false;
+                    } 
+
+                    console.log('words', response.data);
+
+                    words = response.data;
+
+                    self.refreshWords(words);
                 });
             },
 
@@ -218,6 +303,7 @@
         },
         created: function(){
             this.getBeat();
+            this.getWords();
         }
     })
   </script>

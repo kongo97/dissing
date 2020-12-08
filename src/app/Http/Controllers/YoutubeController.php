@@ -5,6 +5,9 @@ namespace App\Http\Controllers;
 use Illuminate\Http\Request;
 use \Google_Client;
 use App\Services\YoutubeService;
+use App\Services\BeatService;
+use App\Services\WordService;
+
 
 class YoutubeController extends Controller
 {
@@ -25,6 +28,20 @@ class YoutubeController extends Controller
             return redirect('oauth2callback');
         
         return $response;
+    }
+
+    public function getBeat()
+    {
+        $beat = BeatService::getBeat();
+
+        return json_encode($beat);
+    }
+
+    public function getWords()
+    {
+        $words = WordService::getWords();
+
+        return json_encode($words);
     }
 
     public function oauth2callback(Request $request)
